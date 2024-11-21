@@ -2,8 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Sidebar } from "../components/sidebar";
 import { InputField } from "../components/inputField";
 import { useToast } from "../components/toast";
-import useAuth from "../hooks/useAuth";  
-import { Search, Salad, Fish, Ham, CookingPot, Plus, X } from 'lucide-react';
+import useAuth from "../hooks/useAuth";
+import Modal from "react-modal"; 
+import { Search, Salad, Fish, Ham, CookingPot, Plus, X, Popcorn, Notebook } from 'lucide-react';
+
+Modal.setAppElement('#root');
 
 export function RegisterMealPage() {
     const [user, setUser] = useState(null);
@@ -13,9 +16,20 @@ export function RegisterMealPage() {
     const [nextId, setNextId] = useState(2);
     const [date, setDate] = useState("");
     const addToast = useToast();
+    const [isModalOpen, setIsModalOpen] = useState(false); 
+    const [foodName, setFoodName] = useState('');
+    const [calories, setCalories] = useState('');
+    const [portionWeight, setPortionWeight] = useState('');
+    const [category, setCategory] = useState('');
 
     // Usando o hook useAuth para obter o usuário autenticado
     const loggedUser = useAuth(addToast);
+
+    // Abre o modal
+    const openModal = () => setIsModalOpen(true);
+
+    // Fecha o modal
+    const closeModal = () => setIsModalOpen(false);
 
     useEffect(() => {
         if (loggedUser) {
@@ -156,6 +170,53 @@ export function RegisterMealPage() {
         }
     };
 
+    // Função para adicionar um novo alimento
+    const handleRegisterFood = async () => {
+        // Verifica se todos os campos foram preenchidos
+        if (!foodName || !calories || !portionWeight || !category) {
+            addToast("Por favor, preencha todos os campos.", "error");
+            return;
+        }
+    
+        // Cria os dados do novo alimento
+        const newFood = {
+            name: foodName,
+            calories_per_portion: Number(calories),
+            portion_weight: Number(portionWeight),
+            category: category, 
+        };
+    
+        // Envia os dados para o backend
+        try {
+            const response = await fetch('http://127.0.0.1:5000/food/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newFood),
+                credentials: 'include',
+            });
+    
+            const data = await response.json();
+    
+            // Verifica se o alimento foi cadastrado com sucesso
+            if (response.ok) {
+                addToast("Alimento cadastrado com sucesso!", "success");
+                setFoodName('');
+                setCalories('');
+                setCategory('');
+                setPortionWeight('');
+                fetchFoods();
+                closeModal();
+            } else {
+                addToast(`Erro ao cadastrar alimento: ${data.message || 'Erro desconhecido'}`, "error");
+            }
+        } catch (error) {
+            addToast("Erro ao cadastrar alimento", "error");
+            console.error("Erro ao cadastrar alimento:", error);
+        }
+    };
+
     useEffect(() => {
         calculateTotalCalories();
     }, [foods]);
@@ -223,10 +284,18 @@ export function RegisterMealPage() {
                                 </div>
                             </div>
                         ))}
-                        <button onClick={handleAddFood} className="flex text-sm items-center mt-4 text-emerald-600 hover:text-emerald-700 border-2 rounded-full p-1 border-emerald-600 hover:border-emerald-700 font-semibold">
-                            <Plus className="mr-2 h-5 w-5" />
-                            Adicionar outro alimento
-                        </button>
+
+                        <div className="flex flex-wrap gap-6">
+                            <button onClick={handleAddFood} className="flex text-sm items-center text-emerald-600 hover:text-emerald-700 border-2 rounded-full py-1 px-3 border-emerald-600 hover:border-emerald-700 font-semibold">
+                                <Plus className="mr-2 h-5 w-5" />
+                                Adicionar outro alimento
+                            </button>
+
+                            <button onClick={openModal} className="flex text-sm items-center text-emerald-600 hover:text-emerald-700 font-semibold">
+                                <Popcorn className="mr-2 h-5 w-5" />
+                                O alimento que você busca não está na lista?
+                            </button>
+                        </div>
 
                         <div className="mt-6">
                             <div className="mb-4">
@@ -250,6 +319,57 @@ export function RegisterMealPage() {
                     </div>
                 </div>
             </div>
+            <Modal isOpen={isModalOpen} onRequestClose={closeModal} contentLabel="Alimento não encontrado" className="relative w-11/12 max-w-md md:max-w-2xl lg:max-w-4xl p-6 mx-auto mt-10 bg-white rounded-2xl shadow-lg focus:outline-none overflow-auto max-h-[90vh]" overlayClassName="fixed inset-0 bg-gray-950 bg-opacity-70 z-30 px-4">
+                <button onClick={closeModal} className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none z-40">
+                    <X className="w-6 h-6" />
+                </button>
+                <div className="flex flex-col p-3 space-y-4">
+                    <h1 className="text-xl md:text-2xl font-bold text-gray-600 mb-3">Cadastre o Alimento</h1>
+                    <div className="grid gap-4 w-full mb-4 grid-cols-1 mt-3">
+                        <InputField
+                            label="Nome do Alimento"
+                            name="foodName"
+                            type="text"
+                            placeholder="Digite o nome do alimento"
+                            value={foodName}
+                            onChange={(e) => setFoodName(e.target.value)}
+                            Icon={CookingPot}
+                        />
+                        <InputField
+                            label="Categoria"
+                            name="category"
+                            type="text"
+                            placeholder="Digite a categoria do alimento"
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                            Icon={Notebook}
+                        />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <InputField
+                                label="Calorias por Porção"
+                                name="calories"
+                                type="number"
+                                placeholder="Calorias por porção"
+                                value={calories}
+                                onChange={(e) => setCalories(e.target.value)}
+                                Icon={Fish}
+                            />
+                            <InputField
+                                label="Peso da Porção (g)"
+                                name="portionWeight"
+                                type="number"
+                                placeholder="Peso da porção"
+                                value={portionWeight}
+                                onChange={(e) => setPortionWeight(e.target.value)}
+                                Icon={Ham}
+                            />
+                        </div>
+                        <button onClick={handleRegisterFood} className="w-full py-3 px-4 text-sm font-semibold rounded-full text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none transition-all">
+                            Cadastrar Alimento
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 }

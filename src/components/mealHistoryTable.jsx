@@ -115,11 +115,11 @@ export function MealHistoryTable({ page }) {
                 </button>
 
                 {selectedMeal && (
-                    <div className="flex flex-col p-3 space-y-6">
+                    <div className="flex flex-col p-1">
                         <h1 className="text-xl md:text-2xl font-bold text-gray-700">Detalhes da Refeição</h1>
-                        <p className="text-md text-gray-600">Data: {formatDateTime(selectedMeal.date)}</p>
+                        <p className="text-md text-gray-600 mb-6">Data: {formatDateTime(selectedMeal.date)}</p>
 
-                        <div className="space-y-4">
+                        <div className="space-y-4 mb-3">
                             <ul className="space-y-2">
                                 {selectedMeal.foods.map((food, index) => (
                                     <li key={index} className="flex text-sm justify-between bg-gray-50 p-3 rounded-2xl border border-gray-300">
