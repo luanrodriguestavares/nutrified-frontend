@@ -35,7 +35,7 @@ Certifique-se de ter o [Node.js](https://nodejs.org/) e o [Yarn](https://yarnpkg
 
 5. Acesse a aplicação no navegador em http://localhost:5173
 
-## ⚠️ Requisitos
+## Requisitos
 
 Este sistema depende de um backend para funcionamento completo. Certifique-se de configurar e rodar o backend antes de usar o frontend.
 
