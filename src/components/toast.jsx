@@ -10,7 +10,13 @@ export const ToastProvider = ({ children }) => {
     // Função para adicionar um Toast
     const addToast = (message, type = "success") => {
         const id = Date.now();
-        setToasts((prev) => [...prev, { id, message, type }]);
+        
+        // Verificar se já existem 4 toasts e remover o mais antigo, se necessário
+        if (toasts.length >= 4) {
+            setToasts((prev) => [...prev.slice(1), { id, message, type }]);
+        } else {
+            setToasts((prev) => [...prev, { id, message, type }]);
+        }
     };
 
     // Função para remover um Toast
