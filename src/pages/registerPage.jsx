@@ -142,7 +142,6 @@ export function RegisterPage() {
                                         name="password"
                                         type="password"
                                         placeholder="Digite sua senha"
-                                        Icon={KeyRound}
                                         value={formData.password}
                                         onChange={handleInputChange}
                                     />
@@ -228,6 +227,12 @@ export function RegisterPage() {
                                     </button>
                                 </>
                             )}
+                            <p className="text-sm text-center text-gray-800 !mt-8">
+                                Já possui uma conta?
+                                <a href="/login" className="text-emerald-600 font-semibold hover:underline ml-1">
+                                    Entrar
+                                </a>
+                            </p>
                         </form>
                     </div>
                     <div className="lg:h-[500px] md:h-[500px] mt-8 md:mt-0">

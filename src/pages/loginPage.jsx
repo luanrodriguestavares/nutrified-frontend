@@ -84,7 +84,6 @@ export function LoginPage() {
                                 name="password"
                                 type="password"
                                 placeholder="Digite sua senha"
-                                Icon={KeyRound}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />

@@ -5,6 +5,7 @@ import { CardDashboard } from "../components/cardDashboard";
 import { MealHistoryTable } from '../components/mealHistoryTable';
 import { useToast } from "../components/toast";
 import useAuth from "../hooks/useAuth";  
+import ChartBars from "../components/chartBars";
 import { GlassWater, Apple, History, HeartPulse } from "lucide-react";
 
 export function DashboardPage() {
@@ -81,6 +82,9 @@ export function DashboardPage() {
                                 Icon={GlassWater}
                                 type="water"
                             />
+                        </div>
+                        <div className="mt-8">
+                            <ChartBars />
                         </div>
                     </div>
                 </div>
