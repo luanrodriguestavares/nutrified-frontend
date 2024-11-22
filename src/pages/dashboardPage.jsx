@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Sidebar } from "../components/sidebar";
 import { Greeting } from "../components/greeting";
 import { CardDashboard } from "../components/cardDashboard";
@@ -13,6 +14,7 @@ export function DashboardPage() {
     const [waterNeeded, setWaterNeeded] = useState(0);
     const [caloriesConsumed, setCaloriesConsumed] = useState(0);
     const [waterConsumed, setWaterConsumed] = useState(0);
+    const navigate = useNavigate();
     const addToast = useToast();
 
     const user = useAuth(addToast);
@@ -39,6 +41,7 @@ export function DashboardPage() {
                     }
                 } catch (error) {
                     addToast('Erro ao buscar os dados do usuário', 'error');
+                    navigate('/login');
                     console.error("Erro ao buscar os dados do usuário:", error);
                 }
             };
