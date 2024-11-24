@@ -40,7 +40,6 @@ export function UserProfilePage() {
                 <p className="text-gray-500 text-sm md:text-base mb-2 leading-relaxed">
                     Aqui estão os seus dados de perfil.
                 </p>
-
                 <div className="mt-8 space-y-6">
                     <div className="container sm:mt-10">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -54,7 +53,6 @@ export function UserProfilePage() {
                                 onChange={(e) => handleInputChange(e, "username")}
                                 readonly={true}
                             />
-
                             <InputField
                                 label="E-mail"
                                 name="email"
@@ -82,7 +80,6 @@ export function UserProfilePage() {
                                 onChange={(e) => handleInputChange(e, "age")}
                                 readonly={true}
                             />
-
                             <InputField
                                 label="Peso"
                                 name="weight"
@@ -96,7 +93,6 @@ export function UserProfilePage() {
                         </div>
                     </div>
                 </div>
-
                 <div className="mt-8 space-y-6">
                     <div className="container sm:mt-10">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -110,7 +106,6 @@ export function UserProfilePage() {
                                 onChange={(e) => handleInputChange(e, "height")}
                                 readonly={true}
                             />
-
                             <InputField
                                 label="Gênero"
                                 name="gender"

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { X, Eye, EyeOff } from "lucide-react"; // Adicionando os ícones do Lucide
+import { X, Eye, EyeOff } from "lucide-react";
 
 export function InputField({
     label,
@@ -15,7 +15,7 @@ export function InputField({
     const [filter, setFilter] = useState(String(value));
     const [selectedLabel, setSelectedLabel] = useState("");
     const [isOpen, setIsOpen] = useState(false);
-    const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar senha
+    const [showPassword, setShowPassword] = useState(false);
     const inputRef = useRef(null);
     const optionsRef = useRef(null);
 
@@ -112,26 +112,15 @@ export function InputField({
                                 }`}
                         />
                         {selectedLabel && (
-                            <button
-                                type="button"
-                                onClick={handleClear}
-                                className="absolute right-12 text-gray-400 mr-2"
-                            >
+                            <button type="button" onClick={handleClear} className="absolute right-12 text-gray-400 mr-2">
                                 <X className="h-4 w-4" />
                             </button>
                         )}
                         {isOpen && !readonly && (
-                            <ul
-                                ref={optionsRef}
-                                className="absolute w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-60 overflow-y-auto z-10 top-full"
-                            >
+                            <ul ref={optionsRef} className="absolute w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-60 overflow-y-auto z-10 top-full">
                                 {filteredOptions.length > 0 ? (
                                     filteredOptions.map((option, index) => (
-                                        <li
-                                            key={index}
-                                            onClick={() => handleSelect(option.value, option.label)}
-                                            className="px-4 py-2 cursor-pointer hover:bg-gray-100"
-                                        >
+                                        <li key={index} onClick={() => handleSelect(option.value, option.label)} className="px-4 py-2 cursor-pointer hover:bg-gray-100">
                                             {option.label}
                                         </li>
                                     ))
@@ -160,7 +149,7 @@ export function InputField({
                     <div className="w-full flex items-center relative">
                         <input
                             name={name}
-                            type={showPassword ? "text" : "password"} // Alterna entre texto e senha
+                            type={showPassword ? "text" : "password"} 
                             value={filter}
                             required
                             onChange={handleInputChange}
@@ -171,11 +160,7 @@ export function InputField({
                                 }`}
                             placeholder={placeholder}
                         />
-                        <button
-                            type="button"
-                            onClick={togglePasswordVisibility}
-                            className="absolute right-4 text-gray-400"
-                        >
+                        <button type="button" onClick={togglePasswordVisibility} className="absolute right-4 text-gray-400">
                             {showPassword ? (
                                 <EyeOff className="h-5 w-5" />
                             ) : (

@@ -16,26 +16,39 @@ export function RegisterMealPage() {
     const [nextId, setNextId] = useState(2);
     const [date, setDate] = useState("");
     const addToast = useToast();
-    const [isModalOpen, setIsModalOpen] = useState(false); 
     const [foodName, setFoodName] = useState('');
     const [calories, setCalories] = useState('');
     const [portionWeight, setPortionWeight] = useState('');
     const [category, setCategory] = useState('');
+    const [animateOpen, setAnimateOpen] = useState(false);
+
+    // Adicionando estado para modal
+    const [modalIsOpen, setModalIsOpen] = useState(false); 
+    const [selectedMeal, setSelectedMeal] = useState(null);
 
     // Usando o hook useAuth para obter o usuário autenticado
     const loggedUser = useAuth(addToast);
 
-    // Abre o modal
-    const openModal = () => setIsModalOpen(true);
-
-    // Fecha o modal
-    const closeModal = () => setIsModalOpen(false);
-
+    // Atualizar o estado do usuário depois que o hook useAuth retornar os dados
     useEffect(() => {
         if (loggedUser) {
             setUser(loggedUser);
         }
     }, [loggedUser]);
+
+    // Abre o modal
+    const openModal = (meal) => {
+        setSelectedMeal(meal);
+        setModalIsOpen(true);
+        setTimeout(() => setAnimateOpen(true), 0);
+    };
+
+    // Fecha o modal
+    const closeModal = () => {
+        setAnimateOpen(false); 
+        setSelectedMeal(null);
+        setModalIsOpen(false); 
+    };
 
     // Função para buscar os alimentos
     const fetchFoods = async () => {
@@ -72,7 +85,7 @@ export function RegisterMealPage() {
         setDate(currentDateTime);
     }, []);
 
-    // Função para lidar com o evento de mudança de alimento
+    // Função para atualizar o alimento
     const handleFoodChange = (id, foodId) => {
         const selectedOption = foodOptions.find(option => option.value === foodId);
         setFoods(prevFoods =>
@@ -89,7 +102,7 @@ export function RegisterMealPage() {
         );
     };
 
-    // Função para lidar com o evento de mudança de quantidade
+    // Função para atualizar a quantidade
     const handleQuantityChange = (id, value) => {
         const quantity = Number(value);
         setFoods(prevFoods =>
@@ -99,7 +112,7 @@ export function RegisterMealPage() {
         );
     };
 
-    // Função para adicionar um novo alimento
+    // Função para adicionar um alimento
     const handleAddFood = () => {
         setFoods([...foods, { id: nextId, food_id: "", quantity: 0, calories: 0, portionWeight: 0 }]);
         setNextId(nextId + 1);
@@ -110,7 +123,7 @@ export function RegisterMealPage() {
         setFoods(prevFoods => prevFoods.filter(food => food.id !== id));
     };
 
-    // Função para calcular o total de calorias
+    // Função para calcular as calorias totais
     const calculateTotalCalories = () => {
         const total = foods.reduce((sum, food) => {
             const caloriesForFood = food.calories * food.quantity;
@@ -119,15 +132,17 @@ export function RegisterMealPage() {
         setTotalCalories(total);
     };
 
-    // Função para adicionar uma refeição
+    // Função para adicionar a refeição
     const handleAddMeal = async () => {
+
+        // Verifica se o usuário está autenticado
         if (!user) {
             addToast("Erro: Usuário não encontrado", "error");
             console.error("Usuário não encontrado no hook useAuth");
             return;
         }
 
-        // Crie os dados da refeição
+        // Monta os dados da refeição
         const mealData = {
             user_id: user.id,
             foods: foods.map(food => ({
@@ -139,7 +154,7 @@ export function RegisterMealPage() {
             date: date,
         };
 
-        // Tente adicionar a refeição
+        // Envia a refeição para o backend
         try {
             const response = await fetch('http://127.0.0.1:5000/meal/meal', {
                 method: 'POST',
@@ -152,17 +167,15 @@ export function RegisterMealPage() {
 
             const data = await response.json();
 
-            // Verifique se a refeição foi adicionada com sucesso
+            // Verifica se a requisição foi bem-sucedida
             if (response.ok) {
                 addToast("Refeição adicionada com sucesso!", "success");
-                console.log("Refeição adicionada com sucesso:");
                 setFoods([]);
                 setTotalCalories(0);
                 setDate(""); 
                 setNextId(2);
             } else {
                 addToast(`Erro ao adicionar refeição: ${data.message || 'Erro desconhecido'}`, "error");
-                console.error("Erro ao adicionar refeição:", data);
             }
         } catch (error) {
             addToast("Erro ao enviar refeição", "error");
@@ -170,23 +183,24 @@ export function RegisterMealPage() {
         }
     };
 
-    // Função para adicionar um novo alimento
+    // Função para registrar um novo alimento
     const handleRegisterFood = async () => {
+
         // Verifica se todos os campos foram preenchidos
         if (!foodName || !calories || !portionWeight || !category) {
             addToast("Por favor, preencha todos os campos.", "error");
             return;
         }
-    
-        // Cria os dados do novo alimento
+
+        // Cria um objeto com os dados do novo alimento
         const newFood = {
             name: foodName,
             calories_per_portion: Number(calories),
             portion_weight: Number(portionWeight),
             category: category, 
         };
-    
-        // Envia os dados para o backend
+
+        // Envia o novo alimento para o backend
         try {
             const response = await fetch('http://127.0.0.1:5000/food/', {
                 method: 'POST',
@@ -196,10 +210,10 @@ export function RegisterMealPage() {
                 body: JSON.stringify(newFood),
                 credentials: 'include',
             });
-    
+
             const data = await response.json();
-    
-            // Verifica se o alimento foi cadastrado com sucesso
+
+            // Verifica se a requisição foi bem-sucedida
             if (response.ok) {
                 addToast("Alimento cadastrado com sucesso!", "success");
                 setFoodName('');
@@ -217,10 +231,12 @@ export function RegisterMealPage() {
         }
     };
 
+    // Função para calcular o total de calorias
     useEffect(() => {
         calculateTotalCalories();
     }, [foods]);
 
+    // Verifique se o usuário está autenticado
     if (!user) return null;
 
     return (
@@ -309,7 +325,7 @@ export function RegisterMealPage() {
                                     type="datetime-local"
                                     value={date}
                                     onChange={(e) => setDate(e.target.value)}
-                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm"
+                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-full shadow-sm outline-emerald-600 sm:text-sm"
                                 />
                             </div>
                             <button onClick={handleAddMeal} className="w-full shadow-xl py-3 px-4 text-sm font-semibold rounded-full text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none transition-all">
@@ -319,7 +335,16 @@ export function RegisterMealPage() {
                     </div>
                 </div>
             </div>
-            <Modal isOpen={isModalOpen} onRequestClose={closeModal} contentLabel="Alimento não encontrado" className="relative w-11/12 max-w-md md:max-w-2xl lg:max-w-4xl p-6 mx-auto mt-10 bg-white rounded-2xl shadow-lg focus:outline-none overflow-auto max-h-[90vh]" overlayClassName="fixed inset-0 bg-gray-950 bg-opacity-70 z-30 px-4">
+            <Modal
+                isOpen={modalIsOpen}
+                onRequestClose={closeModal}
+                contentLabel="Detalhes da Refeição"
+                ariaHideApp={false}
+                className={`relative w-11/12 max-w-md md:max-w-2xl lg:max-w-4xl p-6 mx-auto mt-10 bg-white rounded-2xl shadow-lg focus:outline-none overflow-auto max-h-[90vh] transform transition-transform duration-300 ${
+                    animateOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                overlayClassName="fixed inset-0 bg-gray-950 bg-opacity-70 z-30 px-4 transition-opacity duration-300"
+            >
                 <button onClick={closeModal} className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none z-40">
                     <X className="w-6 h-6" />
                 </button>

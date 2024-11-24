@@ -11,17 +11,23 @@ export function MealHistoryTable({ page }) {
     const [error, setError] = useState(null);
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [selectedMeal, setSelectedMeal] = useState(null);
+    const [animateOpen, setAnimateOpen] = useState(false);
+
     const itemsPerPage = isDashboard ? 6 : 10;
 
+    // Verifica se o usuário está logado
     const user = useAuth();
     const userId = user ? user.id : null;
 
+    // Busca as refeições
     useEffect(() => {
         if (!userId) return;
 
         const fetchMeals = async () => {
             try {
                 const response = await fetch(`http://127.0.0.1:5000/meal/meals?user_id=${userId}`);
+                
+                // Verifica se a requisição foi bem-sucedida
                 if (!response.ok) {
                     throw new Error('Erro ao carregar as refeições');
                 }
@@ -34,9 +40,11 @@ export function MealHistoryTable({ page }) {
             }
         };
 
+        // Chama a função para buscar as refeições
         fetchMeals();
     }, [userId]);
 
+    // Formata a data e a hora
     const formatDateTime = (dateTime) => {
         const date = new Date(dateTime);
         if (isNaN(date)) {
@@ -51,38 +59,52 @@ export function MealHistoryTable({ page }) {
         }).format(date);
     };
 
+    // Abre o modal
+    const openModal = (meal) => {
+        setSelectedMeal(meal);
+        setModalIsOpen(true);
+        setTimeout(() => setAnimateOpen(true), 0);
+    };
+
+    // Fecha o modal
+    const closeModal = () => {
+        setAnimateOpen(false); 
+        setSelectedMeal(null);
+        setModalIsOpen(false); 
+    };
+
+    // Habilita a animação ao abrir o modal
     if (loading) {
         return <div>Carregando...</div>;
     }
 
+    // Exibe a mensagem de erro
     if (error) {
-        return <div className="w-full h-full flex justify-center items-center rounded-2xl border border-gray-300 py-4">
-                    <p className="text-gray-500 text-sm md:text-base mb-2 leading-relaxed">Ao registrar suas refeições, elas aparecerão aqui. 😊</p>
-                </div>;
+        return (
+            <div className="w-full h-full flex justify-center items-center rounded-2xl border border-gray-300 py-4">
+                <p className="text-gray-500 text-sm md:text-base mb-2 leading-relaxed">
+                    Ao registrar suas refeições, elas aparecerão aqui. 😊
+                </p>
+            </div>
+        );
     }
 
+    // Ordena as refeições por data
     const sortedData = [...meals].sort((a, b) => new Date(b.date) - new Date(a.date));
 
+    // Calcula os dados paginados
     const paginatedData = isDashboard
         ? sortedData.slice(0, itemsPerPage)
         : sortedData.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
 
+    // Funções de navegação para avançar
     const handleNextPage = () => {
         const maxPage = Math.ceil(sortedData.length / itemsPerPage) - 1;
         setCurrentPage((prev) => Math.min(prev + 1, maxPage));
     };
 
+    // Funções de navegação para voltar
     const handlePrevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 0));
-
-    const openModal = (meal) => {
-        setSelectedMeal(meal);
-        setModalIsOpen(true);
-    };
-
-    const closeModal = () => {
-        setSelectedMeal(null);
-        setModalIsOpen(false);
-    };
 
     return (
         <>
@@ -101,7 +123,9 @@ export function MealHistoryTable({ page }) {
                                 <td className="px-3 py-4">{meal.total_calories} kcal</td>
                                 <td className="px-3 py-4">{formatDateTime(meal.date)}</td>
                                 <td className="px-3 py-4">
-                                    <button onClick={() => openModal(meal)} className="text-blue-500">Visualizar</button>
+                                    <button onClick={() => openModal(meal)} className="text-blue-500">
+                                        Visualizar
+                                    </button>
                                 </td>
                             </tr>
                         ))}
@@ -109,7 +133,16 @@ export function MealHistoryTable({ page }) {
                 </table>
             </div>
 
-            <Modal isOpen={modalIsOpen} onRequestClose={closeModal} contentLabel="Detalhes da Refeição" ariaHideApp={false} className="relative w-11/12 max-w-md md:max-w-2xl lg:max-w-4xl p-6 mx-auto mt-10 bg-white rounded-2xl shadow-lg focus:outline-none overflow-auto max-h-[90vh]" overlayClassName="fixed inset-0 bg-gray-950 bg-opacity-70 z-30 px-4">
+            <Modal
+                isOpen={modalIsOpen}
+                onRequestClose={closeModal}
+                contentLabel="Detalhes da Refeição"
+                ariaHideApp={false}
+                className={`relative w-11/12 max-w-md md:max-w-2xl lg:max-w-4xl p-6 mx-auto mt-10 bg-white rounded-2xl shadow-lg focus:outline-none overflow-auto max-h-[90vh] transform transition-transform duration-300 ${
+                    animateOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                }`}
+                overlayClassName="fixed inset-0 bg-gray-950 bg-opacity-70 z-30 px-4 transition-opacity duration-300"
+            >
                 <button onClick={closeModal} className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none z-40">
                     <X className="w-6 h-6" />
                 </button>
@@ -122,11 +155,14 @@ export function MealHistoryTable({ page }) {
                         <div className="space-y-4 mb-3">
                             <ul className="space-y-2">
                                 {selectedMeal.foods.map((food, index) => (
-                                    <li key={index} className="flex text-sm justify-between bg-gray-50 p-3 rounded-2xl border border-gray-300">
+                                    <li
+                                        key={index}
+                                        className="flex text-sm justify-between bg-gray-50 p-3 rounded-2xl border border-gray-300"
+                                    >
                                         <span className="text-gray-700 font-medium">{food.food}</span>
                                         <span className="text-gray-500">{food.calories} kcal</span>
                                         <span className="text-gray-500">{food.quantity}</span>
-                                    </li>                                       
+                                    </li>
                                 ))}
                             </ul>
                         </div>

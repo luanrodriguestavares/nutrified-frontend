@@ -134,7 +134,7 @@ export function RegisterWaterPage() {
                                 type="datetime-local"
                                 value={date}
                                 onChange={(e) => setDate(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-full shadow-sm"
+                                className="w-full px-3 py-2 border border-gray-300 outline-emerald-600 rounded-full shadow-sm"
                             />
                         </div>
                         <button onClick={handleAddWaterRecord} className="w-full py-3 px-4 text-sm font-semibold rounded-full text-white bg-emerald-600 hover:bg-emerald-700">
